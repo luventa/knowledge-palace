@@ -18,12 +18,12 @@ Saving to: 'node-v6.10.1.tar.gz'
 2017-04-01 10:23:56 (91.8 KB/s) - 'node-v6.10.1.tar.gz' saved [26721650/26721650]
 ```
 
-Create a new directory and move the tar file into it.
-> mkdir software
+Create new directories and move the tar file into source.
+> mkdir software source package
 
-> mv node-v6.10.1.tar.gz ./software
+> mv node-v6.10.1.tar.gz ./source
 
-> cd software
+> cd source
 
 Extract the tar file
 > tar xvf node-v6.10.1.tar.gz
