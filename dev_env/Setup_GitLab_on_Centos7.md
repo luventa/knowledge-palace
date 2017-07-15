@@ -84,6 +84,14 @@ Change the gitlab rails to it
 + gitlab_rails['gravatar_plain_url'] = 'http://gravatar.duoshuo.com/avatar/%{hash}?s=%{size}&d=identicon'
 ```
 
-### Run reconfigure
+### Change the port with nginx
 
-`sudo gitlab-ctl reconfigure`
+
+
+### Mngt gitlab service
+
+```
+sudo gitlab-ctl reconfigure
+sudo gitlab-ctl stop
+sudo gitlab-ctl start
+```

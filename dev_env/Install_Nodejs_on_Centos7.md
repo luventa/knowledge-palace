@@ -1,3 +1,10 @@
+# Install with yum
+
+```
+sudo yum install epel-release
+sudo yum install nodejs
+```
+
 # Install from source code.
 
 Download list link http://nodejs.org/dist/

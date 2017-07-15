@@ -67,3 +67,8 @@ cd ./www
 # ./nginx -s reload
 
 ```
+
+```
+sudo systemctl start nginx
+sudo systemctl stop nginx
+```
