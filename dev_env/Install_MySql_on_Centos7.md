@@ -2,6 +2,10 @@
 
 This section records how to install MySql with souce code. In other words, make install.
 
+C and C++ compiler must be installed. ncurses also can be installed by yum
+
+`yum install gcc gcc-c++ ncurses-devel`
+
 ## Pre-install CMake
 
 Download list link https://cmake.org/files/
@@ -24,29 +28,77 @@ Download page http://ftp.gnu.org/gnu/ncurses/
 # make && make install
 ```
 
-## Prepare boost
-
-Download page https://sourceforge.net/projects/boost/files/boost/
+## Create user and user group for mysql
 
 ```
-# cd /root/source && wget http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz
-# tar -zxvf boost_1_59_0.tar.gz && cd bison-3.0.4
-# ./configure --prefix=/root/package/bison
-# make && make install
+# groupadd mysql  
+# useradd -r -g mysql mysql  
+```
+
+## Create directory for mysql
+
+```
+# mkdir -p /data/mysqldb
+# mkdir -p /usr/local/mysql
+# mkdir -p /var/log/mysql
 ```
 
 ## Install MySql
 
 Home page of MySql http://www.mysql.com/
 
+The link for downloading package can be found on net.
+
 ```
 # cd /root/source && wget http://cdn.mysql.com/Downloads/MySQL-5.7/mysql-boost-5.7.17.tar.gz
 # tar -zxvf mysql-boost-5.7.17.tar.gz && cd  mysql-5.7.17
-# cmake . -DCMAKE_INSTALL_PREFIX=/root/software/mysql -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/root/package/boost -DCURSES_LIBRARY=/root/package/ncurese/lib/libncurses.a -DCURSES_INCLUDE_PATH=/root/package/ncurses/include
+# cmake \   
+-DCMAKE_INSTALL_PREFIX=/usr/local/mysql \   
+-DMYSQL_UNIX_ADDR=/usr/local/mysql/mysql.sock \   
+-DDEFAULT_CHARSET=utf8 \   
+-DDEFAULT_COLLATION=utf8_general_ci \   
+-DWITH_INNOBASE_STORAGE_ENGINE=1 \   
+-DWITH_ARCHIVE_STORAGE_ENGINE=1 \   
+-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \   
+-DMYSQL_DATADIR=/data/mysqldb \   
+-DMYSQL_TCP_PORT=3306 \   
+-DENABLE_DOWNLOADS=1
 # make && make install
 ```
+## Change owner of mysql directories
 
-And execute `source /etc/profile` to activate this new setting. Done.
+```
+# cd /usr/local/mysql
+# chown -R mysql:mysql .
+# cd /data/mysqldb  
+# chown -R mysql:mysql . 
+# cd /var/log/mysql
+# chown -R mysql:mysql . 
+```
+
+## Initialize database
+
+```
+# cd /usr/local/mysql/scripts && ./mysql_install_db --user=mysql --datadir=/data/mysqldb  
+```
+
+## Config database service
+
+```
+# cp /usr/local/mysql/support-files/my-default.cnf /etc/my.cnf  
+# vi /etc/my.cnf
+
+datadir = /data/mysqldb
+log_error = /var/log/mysql/error.log
+
+# cp support-files/mysql.server /etc/init.d/mysqld
+# vi /etc/profile
+
+PATH=/usr/local/mysql/bin:/usr/local/mysql/lib:$PATH 
+export PATH
+```
+
+And execute `source /etc/profile` to activate this new setting.
 
 ---
 
@@ -80,14 +132,28 @@ This part records some commands for daily management for MySql
 
 ## change password for root
 
-launch MySql cli
+`mysqladmin -u root password 'YOURPASSWORD'`
 
-`# mysql`
+## create user
 
-execute sql
-
-```mysql
-use mysql;
-update user set Password = PASSWORD('YOURPASSWORD') where User ='root';
-flush privileges;
 ```
+mysql> grant select,insert,update,delete on SCHEMANAME.* to USERNAME@% identified by "PASSWORD";
+mysql> flush privileges
+```
+
+## remove user and privileges
+
+```
+mysql> DELETE FROM user WHERE user='USERNAME' AND host='HOSTNAME';
+mysql> flush privileges;
+mysql> drop database USERSDB;
+mysql> drop user USERNAME@'%';
+```
+
+## use MySql with password
+
+`# mysql -u USERNAME -p`
+
+### permission
+
+select,insert,update,delete,create,drop,index,alter,grant,references,reload,shutdown,process,file
